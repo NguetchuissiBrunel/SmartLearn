@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  StyleSheet, 
-  SafeAreaView, 
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
   ScrollView,
   Animated,
   Dimensions,
@@ -23,6 +23,15 @@ import { LLMService } from '../services/llm';
 
 const { width } = Dimensions.get('window');
 
+/**
+ * ExerciseScreen - Le cœur interactif de SmartLearn.
+ * 
+ * Ce composant gère :
+ * 1. Le rendu des exercices mathématiques bilingues (FR/FUL).
+ * 2. La logique de synthèse vocale adaptative (Prosodie Peulh).
+ * 3. Le traçage de la connaissance via l'algorithme BKT.
+ * 4. La remédiation pédagogique par IA.
+ */
 const ExerciseScreen = ({ route }: any) => {
   const { chapterId, chapterTitle } = route.params;
   const [exercise, setExercise] = useState<any>(null);
@@ -49,7 +58,7 @@ const ExerciseScreen = ({ route }: any) => {
         'SELECT * FROM exercises WHERE chapter_id = ? ORDER BY RANDOM() LIMIT 1',
         chapterId
       );
-      
+
       if (ex) {
         setExercise(ex);
         setShowExplanation(false);
@@ -60,7 +69,7 @@ const ExerciseScreen = ({ route }: any) => {
           'SELECT pL FROM student_knowledge WHERE student_id = 1 AND skill_id = ?',
           ex.skill_id
         );
-        
+
         if (knowledge) {
           setKnowledgeProb(knowledge.pL);
           progress.setValue(knowledge.pL);
@@ -68,10 +77,10 @@ const ExerciseScreen = ({ route }: any) => {
 
         // Automatic Bilingual Audio on Load
         const frQuestion = ex.question;
-        const fulQuestion = ex.explanation_peulh?.includes('---') 
-          ? ex.explanation_peulh.split('---')[1].trim() 
+        const fulQuestion = ex.explanation_peulh?.includes('---')
+          ? ex.explanation_peulh.split('---')[1].trim()
           : (ex.explanation_peulh || 'Jaabol mbootu.');
-        
+
         playAudio(`${frQuestion} --- ${fulQuestion}`);
       }
     } catch (err) {
@@ -79,9 +88,13 @@ const ExerciseScreen = ({ route }: any) => {
     }
   };
 
+  /**
+   * Calcule et met à jour la probabilité de maîtrise de l'élève.
+   * Utilise le modèle Bayesian Knowledge Tracing pour prédire l'apprentissage.
+   */
   const handleAnswer = (option: string) => {
     if (answered) return;
-    
+
     const correct = option === exercise.answer;
     setIsCorrect(correct);
     setAnswered(true);
@@ -117,6 +130,11 @@ const ExerciseScreen = ({ route }: any) => {
     }
   };
 
+  /**
+   * Gère la synthèse vocale intelligente.
+   * Si le texte contient '---', l'audio bascule entre Français et Peulh
+   * avec des paramètres de prosodie neuronale spécifiques (vitesse et pitch).
+   */
   const playAudio = async (text?: string, forceLang?: 'fr' | 'ful') => {
     try {
       let speechText = text || exercise?.question;
@@ -134,26 +152,26 @@ const ExerciseScreen = ({ route }: any) => {
         const ful = parts[1].trim();
 
         if (targetLang === 'fr') {
-          Speech.speak(fr, { 
-            language: 'fr-FR', 
+          Speech.speak(fr, {
+            language: 'fr-FR',
             rate: 0.85, // Slightly slower for better clarity
-            pitch: 1.0, 
-            onDone: () => setIsSpeaking(false) 
+            pitch: 1.0,
+            onDone: () => setIsSpeaking(false)
           });
         } else {
           // Optimized for PEULH: Even slower and deeper for a natural 'Griot' style
-          Speech.speak(ful, { 
-            language: 'fr-FR', 
+          Speech.speak(ful, {
+            language: 'fr-FR',
             rate: 0.55, // Very slow to capture Peulh rhythm
             pitch: 0.75, // Lower pitch sounds less like a computer
-            onDone: () => setIsSpeaking(false) 
+            onDone: () => setIsSpeaking(false)
           });
         }
       } else {
         // Standard single-language playback based on toggle
-        Speech.speak(speechText, { 
-          language: 'fr-FR', 
-          rate: targetLang === 'ful' ? 0.55 : 0.85, 
+        Speech.speak(speechText, {
+          language: 'fr-FR',
+          rate: targetLang === 'ful' ? 0.55 : 0.85,
           pitch: targetLang === 'ful' ? 0.75 : 1.0,
           onDone: () => setIsSpeaking(false),
           onStopped: () => setIsSpeaking(false)
@@ -176,9 +194,9 @@ const ExerciseScreen = ({ route }: any) => {
         <View style={styles.progressContainer}>
           <View style={styles.progressBarBg}>
             <Animated.View style={{ width: progress.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }) }}>
-              <LinearGradient 
-                colors={[Colors.gradientStart, Colors.gradientEnd]} 
-                style={styles.progressBarFill} 
+              <LinearGradient
+                colors={[Colors.gradientStart, Colors.gradientEnd]}
+                style={styles.progressBarFill}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
               />
@@ -192,11 +210,11 @@ const ExerciseScreen = ({ route }: any) => {
             <View style={styles.exerciseHeader}>
               <Text style={Typography.caption as any}>{chapterTitle}</Text>
               <View style={styles.headerActions}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   onPress={() => {
                     setCurrentLang(currentLang === 'fr' ? 'ful' : 'fr');
                     Vibration.vibrate(10); // Subtle haptic tick
-                  }} 
+                  }}
                   style={styles.langToggleBtn}
                 >
                   <Languages size={20} color={Colors.primary} />
@@ -215,7 +233,7 @@ const ExerciseScreen = ({ route }: any) => {
 
             <View style={styles.optionsContainer}>
               {options.map((option: string, index: number) => (
-                <TouchableOpacity 
+                <TouchableOpacity
                   key={index}
                   style={[
                     styles.optionBtn,
@@ -242,7 +260,7 @@ const ExerciseScreen = ({ route }: any) => {
                   </Text>
                 </View>
 
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.explanationBtn}
                   onPress={async () => {
                     if (!showExplanation && !dynamicExplanation) {
@@ -256,17 +274,17 @@ const ExerciseScreen = ({ route }: any) => {
 
                       setIsGenerating(true);
                       setShowExplanation(true);
-                      
+
                       // Detailed Bilingual Content Generation
                       const frText = `Explication : La bonne réponse est ${exercise.answer}. C'est une règle de base en ${chapterTitle}.`;
                       const fulText = exercise.explanation_peulh || 'Ndahu ko woni jaabol mbootu.';
                       const fullBilingualText = `${frText} --- ${fulText}`;
-                      
+
                       let currentText = '';
                       let i = 0;
-                      
+
                       playAudio(fullBilingualText);
-                      
+
                       const typeWriter = setInterval(() => {
                         currentText += fullBilingualText.charAt(i);
                         setDynamicExplanation(currentText);
@@ -274,13 +292,13 @@ const ExerciseScreen = ({ route }: any) => {
                         if (i >= fullBilingualText.length) {
                           clearInterval(typeWriter);
                           setIsGenerating(false);
-                          
+
                           try {
                             db.runSync(
                               'UPDATE exercises SET explanation_peulh = ? WHERE id = ?',
                               fullBilingualText, exercise.id
                             );
-                          } catch (e) {}
+                          } catch (e) { }
                         }
                       }, 20);
                     } else {
@@ -306,7 +324,7 @@ const ExerciseScreen = ({ route }: any) => {
                   </View>
                 )}
 
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.nextBtn}
                   onPress={loadNextExercise}
                 >
