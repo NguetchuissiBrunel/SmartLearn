@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { User, GraduationCap, School, ArrowRight } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Spacing, Typography } from '../constants/theme';
 import AfricanPattern from '../components/AfricanPattern';
 import { db } from '../db/database';
@@ -43,8 +44,18 @@ const RegistrationScreen = () => {
           if (!exists) {
             setIsDownloading(true);
             try {
-              await ModelManager.downloadModel((p) => setDownloadProgress(p));
-              navigation.navigate('Chapters');
+              // DEMO MODE: Simulate fast download for the video presentation
+              let p = 0;
+              const interval = setInterval(() => {
+                p += 0.25;
+                if (p > 1) p = 1;
+                setDownloadProgress(p);
+                if (p >= 1) {
+                  clearInterval(interval);
+                  setIsDownloading(false);
+                  navigation.navigate('Chapters');
+                }
+              }, 600); // 2.4 seconds total fake download
             } catch (error) {
               Alert.alert('Erreur', 'Échec du téléchargement du cerveau de l\'IA. Veuillez vérifier votre connexion.');
               setIsDownloading(false);
@@ -62,17 +73,21 @@ const RegistrationScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <LinearGradient
+      colors={[Colors.gradientStart, Colors.gradientEnd]}
       style={styles.container}
     >
-      <AfricanPattern />
-      
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <Text style={Typography.h1 as any}>SMARTLearn</Text>
-          <Text style={Typography.caption as any}>Apprendre à mon rythme, partout.</Text>
-        </View>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <AfricanPattern />
+        
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Text style={[Typography.h1, { color: '#FFF' }] as any}>SMARTLearn</Text>
+            <Text style={[Typography.caption, { color: 'rgba(255,255,255,0.8)' }] as any}>Apprendre à mon rythme, partout.</Text>
+          </View>
 
         <View style={styles.form}>
           <View style={styles.inputContainer}>
@@ -148,14 +163,14 @@ const RegistrationScreen = () => {
           <Text style={styles.downloadText}>Téléchargement du module de langue Peulh...</Text>
         </View>
       )}
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   content: {
     flex: 1,
@@ -167,14 +182,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   form: {
-    backgroundColor: Colors.surface,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     padding: Spacing.lg,
     borderRadius: 24,
     shadowColor: Colors.accent,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 5,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -193,23 +208,28 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   label: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: Colors.primary,
+    fontSize: 15,
+    fontWeight: '800',
+    color: Colors.text,
     marginBottom: 8,
     marginTop: 12,
   },
   button: {
-    backgroundColor: Colors.secondary,
+    backgroundColor: Colors.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 15,
-    borderRadius: 12,
-    marginTop: 10,
+    padding: 16,
+    borderRadius: 16,
+    marginTop: 15,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   buttonText: {
-    color: Colors.primary,
+    color: '#FFF',
     fontWeight: 'bold',
     fontSize: 18,
     marginRight: Spacing.sm,

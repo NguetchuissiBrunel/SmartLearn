@@ -48,12 +48,12 @@ export default function App() {
             backgroundColor: Colors.primary,
             elevation: 0,
             shadowOpacity: 0,
-            borderBottomWidth: 1,
-            borderBottomColor: Colors.border,
+            borderBottomWidth: 0,
           },
-          headerTintColor: Colors.accent,
+          headerTintColor: '#FFFFFF',
           headerTitleStyle: {
-            fontWeight: 'bold',
+            fontWeight: '800',
+            fontSize: 20,
           },
           cardStyle: { backgroundColor: Colors.background }
         }}
@@ -74,7 +74,7 @@ export default function App() {
                 onPress={() => navigation.navigate('Profile')}
                 style={{ marginRight: 20 }}
               >
-                <User color={Colors.primary} size={24} />
+                <User color="#FFFFFF" size={24} />
               </TouchableOpacity>
             ),
           })}

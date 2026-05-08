@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { User, Award, TrendingUp, ChevronLeft } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Spacing, Typography } from '../constants/theme';
 import AfricanPattern from '../components/AfricanPattern';
 import { db } from '../db/database';
@@ -88,7 +89,12 @@ const ProfileScreen = () => {
           <View style={styles.progressCard}>
             <Text style={styles.progressLabel}>Compétences acquises</Text>
             <View style={styles.progressBarBg}>
-              <View style={[styles.progressBar, { width: `${stats.avgMastery * 100}%` }]} />
+              <LinearGradient 
+                colors={[Colors.gradientStart, Colors.gradientEnd]} 
+                style={[styles.progressBar, { width: `${stats.avgMastery * 100}%` }]} 
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              />
             </View>
           </View>
         </View>
@@ -127,23 +133,23 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
   },
   avatarContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: Colors.secondary + '10',
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: Colors.secondary + '15',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: Spacing.md,
   },
   studentName: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: Colors.primary,
+    fontSize: 24,
+    fontWeight: '900',
+    color: Colors.text,
     marginBottom: 4,
   },
   schoolName: {
     fontSize: 16,
-    color: '#666',
+    color: Colors.textSecondary,
     marginBottom: Spacing.md,
   },
   badgeContainer: {
@@ -173,44 +179,51 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontWeight: '900',
     color: Colors.primary,
     marginTop: 8,
   },
   statLabel: {
-    fontSize: 12,
-    color: '#999',
+    fontSize: 13,
+    color: Colors.textSecondary,
     marginTop: 4,
+    fontWeight: '600',
   },
   section: {
     marginBottom: Spacing.xl,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.primary,
+    fontSize: 20,
+    fontWeight: '800',
+    color: Colors.text,
     marginBottom: Spacing.md,
   },
   progressCard: {
-    backgroundColor: '#FFF',
+    backgroundColor: Colors.surface,
     padding: Spacing.lg,
     borderRadius: 20,
+    shadowColor: Colors.accent,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
   },
   progressLabel: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 10,
+    fontSize: 15,
+    color: Colors.textSecondary,
+    fontWeight: '600',
+    marginBottom: 12,
   },
   progressBarBg: {
-    height: 10,
-    backgroundColor: '#F0F0F0',
-    borderRadius: 5,
+    height: 12,
+    backgroundColor: Colors.border,
+    borderRadius: 6,
     overflow: 'hidden',
   },
   progressBar: {
     height: '100%',
-    backgroundColor: Colors.secondary,
+    borderRadius: 6,
   }
 });
 

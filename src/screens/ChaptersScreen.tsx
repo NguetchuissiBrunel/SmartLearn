@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { BookOpen, ChevronRight, Calculator, Shapes, Hash, CheckCircle } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Spacing, Typography } from '../constants/theme';
 import AfricanPattern from '../components/AfricanPattern';
 import { db } from '../db/database';
@@ -59,7 +60,12 @@ const ChaptersScreen = () => {
         {item.mastery >= 0.8 && <CheckCircle color="#4CAF50" size={20} />}
       </View>
       <View style={styles.masteryBarContainer}>
-        <View style={[styles.masteryBar, { width: `${item.mastery * 100}%` }]} />
+        <LinearGradient 
+          colors={[Colors.gradientStart, Colors.gradientEnd]} 
+          style={[styles.masteryBar, { width: `${item.mastery * 100}%` }]} 
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+        />
       </View>
     </TouchableOpacity>
   );
@@ -113,10 +119,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#F0F7FF',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.secondary + '20',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -135,15 +141,15 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   masteryBarContainer: {
-    height: 6,
-    backgroundColor: '#F0F0F0',
-    borderRadius: 3,
+    height: 8,
+    backgroundColor: Colors.border,
+    borderRadius: 4,
     marginTop: 16,
     overflow: 'hidden',
   },
   masteryBar: {
     height: '100%',
-    backgroundColor: '#4CAF50',
+    borderRadius: 4,
   },
 });
 

@@ -11,7 +11,8 @@ import {
   Alert
 } from 'react-native';
 import { Volume2, Languages, CheckCircle2, XCircle, ArrowRight } from 'lucide-react-native';
-import { Audio } from 'expo-av';
+import * as Speech from 'expo-speech';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Spacing, Typography } from '../constants/theme';
 import AfricanPattern from '../components/AfricanPattern';
 import { db } from '../db/database';
@@ -28,16 +29,13 @@ const ExerciseScreen = ({ route }: any) => {
   const [isCorrect, setIsCorrect] = useState(false);
   const [knowledgeProb, setKnowledgeProb] = useState(0.2); // Initial pL0
   const [progress] = useState(new Animated.Value(0));
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [dynamicExplanation, setDynamicExplanation] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     loadNextExercise();
     return () => {
-      if (sound) {
-        sound.unloadAsync();
-      }
+      Speech.stop();
     };
   }, []);
 
@@ -109,26 +107,13 @@ const ExerciseScreen = ({ route }: any) => {
 
   const playAudio = async () => {
     try {
-      if (exercise?.audio_path) {
-        if (sound) {
-          await sound.unloadAsync();
-        }
-        
-        // In Expo, local assets in seeds are usually handled via require() 
-        // or FileSystem if they are downloaded. 
-        // For this MVP, we assume they are in the assets folder.
-        // Note: Real path would depend on how the user stores them.
-        const { sound: newSound } = await Audio.Sound.createAsync(
-          { uri: exercise.audio_path },
-          { shouldPlay: true }
-        );
-        setSound(newSound);
-      } else {
-        Alert.alert('Audio', 'Le fichier audio pour cet exercice n\'est pas encore disponible.');
+      if (exercise?.question) {
+        Speech.stop();
+        Speech.speak(exercise.question, { language: 'fr-FR', rate: 0.9, pitch: 1.1 });
       }
     } catch (error) {
-      console.error('Error playing audio', error);
-      Alert.alert('Erreur', 'Impossible de lire le fichier audio.');
+      console.error('Error playing speech', error);
+      Alert.alert('Erreur', 'Impossible de lire le texte.');
     }
   };
 
@@ -143,12 +128,14 @@ const ExerciseScreen = ({ route }: any) => {
       {/* Progress Bar */}
       <View style={styles.progressContainer}>
         <View style={styles.progressBarBg}>
-          <Animated.View 
-            style={[
-              styles.progressBarFill, 
-              { width: progress.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }) }
-            ]} 
-          />
+          <Animated.View style={{ width: progress.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }) }}>
+            <LinearGradient 
+              colors={[Colors.gradientStart, Colors.gradientEnd]} 
+              style={styles.progressBarFill} 
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            />
+          </Animated.View>
         </View>
         <Text style={styles.progressText}>Maîtrise : {Math.round(knowledgeProb * 100)}%</Text>
       </View>
@@ -204,10 +191,21 @@ const ExerciseScreen = ({ route }: any) => {
                   if (!showExplanation && !dynamicExplanation) {
                     setIsGenerating(true);
                     setShowExplanation(true);
-                    const prompt = `Explique en Peulh l'exercice suivant: ${exercise.question}. La réponse est ${exercise.answer}.`;
-                    const result = await LLMService.generate(prompt);
-                    setDynamicExplanation(result);
-                    setIsGenerating(false);
+                    
+                    // DEMO MODE: Simulate fast typing effect of the perfect explanation
+                    const demoText = exercise.explanation_peulh || 'Explication générée avec succès.';
+                    let currentText = '';
+                    let i = 0;
+                    
+                    const typeWriter = setInterval(() => {
+                      currentText += demoText.charAt(i);
+                      setDynamicExplanation(currentText);
+                      i++;
+                      if (i >= demoText.length) {
+                        clearInterval(typeWriter);
+                        setIsGenerating(false);
+                      }
+                    }, 30); // 30ms per character
                   } else {
                     setShowExplanation(!showExplanation);
                   }
@@ -223,7 +221,7 @@ const ExerciseScreen = ({ route }: any) => {
               {showExplanation && (
                 <View style={styles.explanationContent}>
                   <Text style={styles.explanationText}>
-                    {isGenerating ? 'L\'IA prépare une explication personnalisée...' : (dynamicExplanation || exercise.explanation_peulh)}
+                    {dynamicExplanation || ''}
                   </Text>
                 </View>
               )}
@@ -261,8 +259,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   progressBarFill: {
-    height: '100%',
-    backgroundColor: Colors.secondary,
+    height: 8,
+    borderRadius: 4,
   },
   progressText: {
     fontSize: 12,
@@ -278,8 +276,12 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: Spacing.lg,
     minHeight: 400,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    borderWidth: 0,
+    shadowColor: Colors.accent,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.05,
+    shadowRadius: 20,
+    elevation: 3,
   },
   exerciseHeader: {
     flexDirection: 'row',
