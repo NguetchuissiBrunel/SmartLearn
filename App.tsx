@@ -8,6 +8,7 @@ import RegistrationScreen from './src/screens/RegistrationScreen';
 import ChaptersScreen from './src/screens/ChaptersScreen';
 import ExerciseScreen from './src/screens/ExerciseScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import SplashScreen from './src/screens/SplashScreen';
 import { Colors } from './src/constants/theme';
 import { User } from 'lucide-react-native';
 import { TouchableOpacity } from 'react-native';
@@ -42,39 +43,37 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator 
-        initialRouteName="Registration"
+        initialRouteName="Splash"
         screenOptions={{
-          headerStyle: {
-            backgroundColor: Colors.primary,
-            elevation: 0,
-            shadowOpacity: 0,
-            borderBottomWidth: 0,
-          },
-          headerTintColor: '#FFFFFF',
-          headerTitleStyle: {
-            fontWeight: '800',
-            fontSize: 20,
-          },
-          cardStyle: { backgroundColor: Colors.background }
+          headerShown: false,
+          cardStyle: { backgroundColor: 'transparent' },
+          gestureEnabled: true,
         }}
       >
-        <Stack.Screen 
-          name="Registration" 
-          component={RegistrationScreen} 
-          options={{ title: 'Bienvenue' }}
-        />
+        <Stack.Screen name="Splash" component={SplashScreen} />
+        <Stack.Screen name="Registration" component={RegistrationScreen} />
         <Stack.Screen 
           name="Chapters" 
           component={ChaptersScreen} 
           options={({ navigation }) => ({
             headerShown: true,
             title: 'Mes Chapitres',
+            headerStyle: {
+              backgroundColor: Colors.bgGradientStart,
+              elevation: 0,
+              shadowOpacity: 0,
+            },
+            headerTintColor: Colors.primary,
+            headerTitleStyle: {
+              fontWeight: '900',
+              fontSize: 22,
+            },
             headerRight: () => (
               <TouchableOpacity 
                 onPress={() => navigation.navigate('Profile')}
                 style={{ marginRight: 20 }}
               >
-                <User color="#FFFFFF" size={24} />
+                <User color={Colors.primary} size={24} />
               </TouchableOpacity>
             ),
           })}
@@ -82,7 +81,23 @@ export default function App() {
         <Stack.Screen 
           name="Exercise" 
           component={ExerciseScreen} 
-          options={{ title: 'Exercice' }}
+          options={{ 
+            headerShown: true,
+            title: 'Leçon IA',
+            headerStyle: {
+              backgroundColor: Colors.bgGradientStart,
+              elevation: 0,
+              shadowOpacity: 0,
+            },
+            headerTintColor: Colors.primary,
+          }}
+        />
+        <Stack.Screen 
+          name="Profile" 
+          component={ProfileScreen} 
+          options={{ 
+            headerShown: false,
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>

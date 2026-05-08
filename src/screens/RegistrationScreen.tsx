@@ -151,16 +151,15 @@ const RegistrationScreen = () => {
             </TouchableOpacity>
           </BlurView>
         </View>
-      </View>
 
-      {isDownloading && (
-        <View style={styles.downloadOverlay}>
-          <View style={styles.progressBarContainer}>
-            <View style={[styles.progressBar, { width: `${downloadProgress * 100}%` }]} />
+        {isDownloading && (
+          <View style={styles.downloadOverlay}>
+            <View style={styles.progressBarContainer}>
+              <View style={[styles.progressBar, { width: `${downloadProgress * 100}%` }]} />
+            </View>
+            <Text style={styles.downloadText}>Téléchargement du module de langue Peulh...</Text>
           </View>
-          <Text style={styles.downloadText}>Téléchargement du module de langue Peulh...</Text>
-        </View>
-      )}
+        )}
       </KeyboardAvoidingView>
     </LinearGradient>
   );
