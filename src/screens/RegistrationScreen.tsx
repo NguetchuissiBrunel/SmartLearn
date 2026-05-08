@@ -4,10 +4,10 @@ import {
   Text, 
   TextInput, 
   TouchableOpacity, 
-  StyleSheet, 
-  KeyboardAvoidingView, 
   Platform,
-  Alert
+  Alert,
+  Vibration,
+  ActivityIndicator
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { User, GraduationCap, School, ArrowRight } from 'lucide-react-native';
@@ -99,18 +99,6 @@ const RegistrationScreen = () => {
             </View>
 
             <View style={styles.inputContainer}>
-              <GraduationCap size={20} color={Colors.textSecondary} style={styles.icon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Ta classe (ex: 6ème)"
-                placeholderTextColor={Colors.textSecondary}
-                value={studentClass}
-                onChangeText={setStudentClass}
-                editable={false} 
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
               <School size={20} color={Colors.textSecondary} style={styles.icon} />
               <TextInput
                 style={styles.input}
@@ -122,17 +110,41 @@ const RegistrationScreen = () => {
             </View>
 
             <View style={styles.languageContainer}>
+              <Text style={styles.label}>Choisis ta classe</Text>
+              <View style={styles.langButtons}>
+                {['CM1', 'CM2', '6ème', '5ème'].map((c) => (
+                  <TouchableOpacity 
+                    key={c}
+                    style={[styles.langBtn, studentClass === c && styles.langBtnActive]} 
+                    onPress={() => {
+                      setStudentClass(c);
+                      Vibration.vibrate(10);
+                    }}
+                  >
+                    <Text style={[styles.langBtnText, studentClass === c && styles.langBtnTextActive]}>{c}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.languageContainer}>
               <Text style={styles.label}>Langue de l'interface</Text>
               <View style={styles.langButtons}>
                 <TouchableOpacity 
                   style={[styles.langBtn, language === 'fr' && styles.langBtnActive]} 
-                  onPress={() => setLanguage('fr')}
+                  onPress={() => {
+                    setLanguage('fr');
+                    Vibration.vibrate(10);
+                  }}
                 >
                   <Text style={[styles.langBtnText, language === 'fr' && styles.langBtnTextActive]}>Français</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={[styles.langBtn, language === 'ful' && styles.langBtnActive]} 
-                  onPress={() => setLanguage('ful')}
+                  onPress={() => {
+                    setLanguage('ful');
+                    Vibration.vibrate(10);
+                  }}
                 >
                   <Text style={[styles.langBtnText, language === 'ful' && styles.langBtnTextActive]}>Peulh</Text>
                 </TouchableOpacity>
@@ -153,12 +165,13 @@ const RegistrationScreen = () => {
         </View>
 
         {isDownloading && (
-          <View style={styles.downloadOverlay}>
-            <View style={styles.progressBarContainer}>
-              <View style={[styles.progressBar, { width: `${downloadProgress * 100}%` }]} />
+          <BlurView intensity={90} tint="dark" style={styles.downloadOverlay}>
+            <View style={styles.loaderContainer}>
+              <ActivityIndicator size="large" color={Colors.secondary} />
+              <Text style={styles.percentageText}>{Math.round(downloadProgress * 100)}%</Text>
             </View>
-            <Text style={styles.downloadText}>Téléchargement du module de langue Peulh...</Text>
-          </View>
+            <Text style={styles.downloadText}>Initialisation du cerveau de l'IA...</Text>
+          </BlurView>
         )}
       </KeyboardAvoidingView>
     </LinearGradient>
@@ -244,47 +257,59 @@ const styles = StyleSheet.create({
   },
   langBtn: {
     flex: 1,
-    padding: 12,
+    padding: 10,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#EEE',
+    borderWidth: 1.5,
+    borderColor: 'rgba(0,0,0,0.05)',
+    backgroundColor: 'rgba(255,255,255,0.3)',
     alignItems: 'center',
-    backgroundColor: '#FAFAFA',
+    justifyContent: 'center',
   },
   langBtnActive: {
-    borderColor: Colors.secondary,
-    backgroundColor: Colors.secondary + '10',
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 4,
   },
   langBtnText: {
     fontSize: 14,
-    color: '#666',
+    fontWeight: 'bold',
+    color: Colors.textSecondary,
   },
   langBtnTextActive: {
-    color: Colors.secondary,
-    fontWeight: 'bold',
+    color: '#FFF',
   },
   downloadOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255,255,255,0.9)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 30,
+    zIndex: 1000,
   },
-  progressBarContainer: {
-    width: '100%',
-    height: 10,
-    backgroundColor: '#EEE',
-    borderRadius: 5,
-    overflow: 'hidden',
-    marginBottom: 10,
+  loaderContainer: {
+    width: 120,
+    height: 120,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 60,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
   },
-  progressBar: {
-    height: '100%',
-    backgroundColor: Colors.secondary,
+  percentageText: {
+    position: 'absolute',
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFF',
   },
   downloadText: {
-    fontSize: 14,
-    color: '#666',
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+    letterSpacing: 0.5,
     textAlign: 'center',
   }
 });

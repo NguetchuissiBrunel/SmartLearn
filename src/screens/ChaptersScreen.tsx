@@ -14,6 +14,7 @@ import { BlurView } from 'expo-blur';
 import { Colors, Spacing, Typography } from '../constants/theme';
 import AfricanPattern from '../components/AfricanPattern';
 import { db } from '../db/database';
+import { translations, Language } from '../utils/i18n';
 
 const ChapterIcon = ({ title, size, color }: { title: string, size: number, color: string }) => {
   return <BookOpen size={size} color={color} />;
@@ -22,6 +23,7 @@ const ChapterIcon = ({ title, size, color }: { title: string, size: number, colo
 const ChaptersScreen = () => {
   const navigation = useNavigation<any>();
   const [chapters, setChapters] = useState<any[]>([]);
+  const [lang, setLang] = useState<Language>('fr');
 
   useEffect(() => {
     try {
@@ -35,6 +37,9 @@ const ChaptersScreen = () => {
       
       const data = rows.map(ch => ({ ...ch, mastery: ch.avg_mastery || 0 }));
       setChapters(data);
+
+      const student = db.getFirstSync<any>('SELECT language FROM students ORDER BY id DESC LIMIT 1');
+      if (student?.language) setLang(student.language);
     } catch (err) {
       console.error('Error fetching chapters', err);
     }
@@ -73,8 +78,8 @@ const ChaptersScreen = () => {
       <SafeAreaView style={{ flex: 1 }}>
         <AfricanPattern />
         <View style={styles.header}>
-          <Text style={Typography.h1 as any}>Choisis ton chapitre</Text>
-          <Text style={Typography.caption as any}>Continue ton aventure d'apprentissage.</Text>
+          <Text style={Typography.h1 as any}>{translations[lang].select_chapter}</Text>
+          <Text style={Typography.caption as any}>{translations[lang].chapters_subtitle}</Text>
         </View>
 
         <FlatList

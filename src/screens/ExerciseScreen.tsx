@@ -8,7 +8,8 @@ import {
   ScrollView,
   Animated,
   Dimensions,
-  Alert
+  Alert,
+  Vibration
 } from 'react-native';
 import { Volume2, Languages, CheckCircle2, XCircle, ArrowRight } from 'lucide-react-native';
 import * as Speech from 'expo-speech';
@@ -104,6 +105,13 @@ const ExerciseScreen = ({ route }: any) => {
         duration: 500,
         useNativeDriver: false
       }).start();
+
+      // Technical: Haptic Feedback
+      if (correct) {
+        Vibration.vibrate(50); // Short pulse for success
+      } else {
+        Vibration.vibrate([0, 50, 100, 50]); // Double pulse for error
+      }
     } catch (err) {
       console.error('Error updating attempt', err);
     }
@@ -185,7 +193,10 @@ const ExerciseScreen = ({ route }: any) => {
               <Text style={Typography.caption as any}>{chapterTitle}</Text>
               <View style={styles.headerActions}>
                 <TouchableOpacity 
-                  onPress={() => setCurrentLang(currentLang === 'fr' ? 'ful' : 'fr')} 
+                  onPress={() => {
+                    setCurrentLang(currentLang === 'fr' ? 'ful' : 'fr');
+                    Vibration.vibrate(10); // Subtle haptic tick
+                  }} 
                   style={styles.langToggleBtn}
                 >
                   <Languages size={20} color={Colors.primary} />
