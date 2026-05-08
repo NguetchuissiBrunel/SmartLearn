@@ -8,16 +8,14 @@ import {
   SafeAreaView 
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { BookOpen, ChevronRight, Calculator, Shapes, Hash, CheckCircle } from 'lucide-react-native';
+import { BookOpen } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { Colors, Spacing, Typography } from '../constants/theme';
 import AfricanPattern from '../components/AfricanPattern';
 import { db } from '../db/database';
 
 const ChapterIcon = ({ title, size, color }: { title: string, size: number, color: string }) => {
-  if (title.includes('Numération')) return <Hash size={size} color={color} />;
-  if (title.includes('Opérations')) return <Calculator size={size} color={color} />;
-  if (title.includes('Fractions')) return <Shapes size={size} color={color} />;
   return <BookOpen size={size} color={color} />;
 };
 
@@ -43,35 +41,38 @@ const ChaptersScreen = () => {
   }, []);
 
   const renderItem = ({ item }: { item: any }) => (
-    <TouchableOpacity 
-      style={styles.card}
-      onPress={() => navigation.navigate('Exercise', { chapterId: item.id, chapterTitle: item.title })}
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={() => navigation.navigate('Exercise', { chapterId: item.id })}
     >
-      <View style={styles.cardHeader}>
-        <View style={styles.iconContainer}>
-          <ChapterIcon title={item.title} size={28} color={Colors.secondary} />
+      <BlurView intensity={70} tint="light" style={styles.card}>
+        <View style={styles.cardHeader}>
+          <View style={styles.iconContainer}>
+            <BookOpen color={Colors.primary} size={28} />
+          </View>
+          <View style={styles.cardContent}>
+            <Text style={styles.chapterTitle}>{item.title}</Text>
+            <Text style={styles.chapterDesc}>{item.description}</Text>
+          </View>
         </View>
-        <View style={styles.cardContent}>
-          <Text style={styles.chapterTitle}>{item.title}</Text>
-          <Text style={styles.chapterDesc}>{item.description}</Text>
+
+        <View style={styles.masteryBarContainer}>
+          <LinearGradient 
+            colors={[Colors.gradientStart, Colors.gradientEnd]} 
+            style={[styles.masteryBar, { width: `${item.mastery * 100}%` }]} 
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          />
         </View>
-        {item.mastery >= 0.8 && <CheckCircle color="#4CAF50" size={20} />}
-      </View>
-      <View style={styles.masteryBarContainer}>
-        <LinearGradient 
-          colors={[Colors.gradientStart, Colors.gradientEnd]} 
-          style={[styles.masteryBar, { width: `${item.mastery * 100}%` }]} 
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-        />
-      </View>
+      </BlurView>
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <AfricanPattern />
-      <View style={styles.header}>
+    <LinearGradient colors={[Colors.bgGradientStart, Colors.bgGradientEnd]} style={styles.container}>
+      <SafeAreaView style={{ flex: 1 }}>
+        <AfricanPattern />
+        <View style={styles.header}>
         <Text style={Typography.h1 as any}>Choisis ton chapitre</Text>
         <Text style={Typography.caption as any}>Continue ton aventure d'apprentissage.</Text>
       </View>
@@ -100,17 +101,13 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
   },
   card: {
-    backgroundColor: '#FFF',
-    padding: 24, // Bigger padding
+    backgroundColor: 'rgba(255, 255, 255, 0.65)', // Semi-transparent for blur
+    padding: 24,
     borderRadius: 20,
-    marginBottom: 24, // More space between cards
+    marginBottom: 24,
     borderWidth: 1,
-    borderColor: '#F0F0F0',
-    elevation: 4, // Better shadow for depth
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+    overflow: 'hidden', // Required for BlurView rounding
   },
   cardHeader: {
     flexDirection: 'row',

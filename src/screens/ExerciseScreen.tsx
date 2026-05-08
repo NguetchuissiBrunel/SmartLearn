@@ -13,6 +13,7 @@ import {
 import { Volume2, Languages, CheckCircle2, XCircle, ArrowRight } from 'lucide-react-native';
 import * as Speech from 'expo-speech';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { Colors, Spacing, Typography } from '../constants/theme';
 import AfricanPattern from '../components/AfricanPattern';
 import { db } from '../db/database';
@@ -245,9 +246,8 @@ const styles = StyleSheet.create({
   },
   progressContainer: {
     padding: Spacing.md,
-    backgroundColor: Colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    backgroundColor: 'transparent',
+    borderBottomWidth: 0,
   },
   progressBarBg: {
     height: 8,
@@ -269,16 +269,17 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
   },
   exerciseCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderRadius: 32,
     padding: Spacing.lg,
-    minHeight: 400,
-    borderWidth: 0,
-    shadowColor: Colors.accent,
+    minHeight: 450,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+    overflow: 'hidden',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.1,
     shadowRadius: 20,
-    elevation: 3,
   },
   exerciseHeader: {
     flexDirection: 'row',

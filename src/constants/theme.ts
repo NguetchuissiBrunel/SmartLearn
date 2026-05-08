@@ -2,13 +2,19 @@ export const Colors = {
   primary: '#4F46E5',    // Indigo (Vibrant primary)
   secondary: '#0EA5E9',  // Sky blue (Accents/Secondary)
   accent: '#F59E0B',     // Amber for highlights/badges
-  background: '#F8FAFC', // Slate 50 (Very light gray/blue)
-  text: '#0F172A',       // Slate 900 (Dark for contrast)
+  background: '#F0F4FF', // Very light blue/indigo tint
+  text: '#1E293B',       // Slate 800 (Softer than pure black)
   textSecondary: '#64748B', // Slate 500
   border: '#E2E8F0',     // Slate 200
   success: '#10B981',    // Emerald 500
   error: '#EF4444',      // Red 500
   surface: '#FFFFFF',    // White for cards
+  
+  // Immersive Background Gradients
+  bgGradientStart: '#EEF2FF', // Indigo 50
+  bgGradientEnd: '#E0E7FF',   // Indigo 100
+  
+  // Element Gradients
   gradientStart: '#4F46E5',
   gradientEnd: '#3B82F6',
 };
@@ -27,10 +33,10 @@ export const Typography = {
     fontSize: 34,
     fontWeight: '900' as '900',
     color: Colors.text,
-    letterSpacing: -0.5,
+    letterSpacing: -0.8,
   },
   h2: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: '800' as '800',
     color: Colors.text,
     letterSpacing: -0.5,
