@@ -1,66 +1,51 @@
-# SMARTLearn – Système d’apprentissage adaptatif hors ligne
+# 🧠 SmartLearn : L'IA au Service de l'Éducation Bilingue
 
-**SMARTLearn** est une application mobile éducative conçue pour transformer l'apprentissage des mathématiques pour les élèves de 6ème, particulièrement dans les régions septentrionales du Cameroun. Elle intègre des technologies d'IA avancées pour fonctionner entièrement sans connexion internet.
+SmartLearn est une application éducative innovante conçue pour offrir un tutorat intelligent et personnalisé en **Français** et en **Peulh**. Elle combine des algorithmes de traçage de la connaissance (BKT) avec une interface premium pour maximiser l'engagement des élèves.
 
-## 🌟 Caractéristiques Principales
+## ✨ Fonctionnalités Clés
 
-- **IA Adaptative (BKT)** : Un algorithme *Bayesian Knowledge Tracing* suit la maîtrise des compétences de l'élève en temps réel et adapte la difficulté des exercices.
-- **Support en Langue Peulh** : 
-  - **Explications IA** : Génération dynamique de consignes en Peulh via un LLM léger (`SmolLM2-135M`) tournant localement.
-  - **Audio TTS** : 90 fichiers audio pré-générés pour accompagner chaque exercice.
-- **Fonctionnement 100% Hors Ligne** : Aucune donnée n'est requise pour l'apprentissage, les explications ou le suivi.
-- **Design Bogolan** : Une interface moderne et épurée inspirée du patrimoine culturel africain.
-- **Synchronisation Différée** : Envoi automatique des logs de progression dès qu'une connexion internet est détectée.
+- **🌍 Tutorat Bilingue Natif** : L'interface et les exercices basculent instantanément entre le Français et le Peulh.
+- **🎙️ Synthèse Vocale Adaptative** : Audio IA optimisé pour le Peulh avec une prosodie naturelle (Style Griot).
+- **🤖 Intelligence Artificielle Prédictive** : 
+  - Utilisation de l'algorithme **Bayesian Knowledge Tracing (BKT)** pour prédire la réussite de l'élève.
+  - Génération d'explications détaillées et bilingues par IA.
+- **📊 Carte Cognitive IA** : Visualisation radar des compétences dans le profil utilisateur.
+- **💎 Design Premium Glassmorphism** : Interface moderne avec effets de flou, motifs Bogolan en relief et retours haptiques (vibrations).
 
 ## 🛠️ Stack Technique
 
-- **Framework** : React Native (Expo SDK 54)
-- **Base de données** : SQLite (expo-sqlite)
-- **Moteur LLM** : `llama.rn` (bindings llama.cpp)
-- **Algorithme BKT** : Implémentation JavaScript personnalisée
-- **Design** : Lucide React Native & Custom SVG Patterns
+- **Framework** : [Expo](https://expo.dev/) (SDK 54) / React Native
+- **Base de Données** : [SQLite](https://docs.expo.dev/versions/latest/sdk/sqlite/) pour la persistance locale et le cache IA.
+- **Graphismes** : SVG (react-native-svg) & Linear Gradient.
+- **Animations** : React Native Animated API & Expo Blur.
+- **Audio** : Expo Speech pour le multilinguisme.
+- **Algorithmes** : Moteur BKT personnalisé pour le traçage des compétences.
 
 ## 🚀 Installation et Lancement
 
-### 1. Prérequis
-- Node.js (v18+)
-- Android Studio (pour le simulateur Android ou le déploiement APK)
-- Expo Go (uniquement pour les parties non-IA) ou **Development Build** (recommandé).
+1. **Cloner le repository** :
+   ```bash
+   git clone [url-du-repo]
+   cd smartlearn
+   ```
 
-### 2. Installation
-```bash
-# Cloner le projet
-# cd smartlearn
+2. **Installer les dépendances** :
+   ```bash
+   npm install
+   ```
 
-# Installer les dépendances
-npm install
+3. **Lancer l'application** :
+   ```bash
+   npx expo start
+   ```
+   *Scannez le QR Code avec l'application **Expo Go** (Android/iOS).*
 
-# Installer les modules natifs (nécessaire pour llama.rn)
-npx expo prebuild
-```
+## 📖 Structure du Projet
 
-### 3. Téléchargement du Modèle IA
-Au premier lancement, l'application vous proposera de télécharger le modèle `smollm2-135m-q4_k_m.gguf` (~70 Mo).
-Si vous souhaitez l'ajouter manuellement :
-1. Téléchargez le modèle depuis Hugging Face.
-2. Placez-le dans le dossier `Documents/models/` de l'application sur votre appareil.
-
-### 4. Lancement
-```bash
-# Démarrer le serveur Expo
-npx expo start
-
-# Lancer sur Android
-npx expo run:android
-```
-
-## 📚 Structure pédagogique
-Le MVP contient **3 chapitres** de mathématiques :
-1. **Numération** (30 exercices)
-2. **Opérations** (30 exercices)
-3. **Fractions** (30 exercices)
+- `src/screens/` : Écrans principaux (Exercices, Chapitres, Profil, Splash).
+- `src/components/` : Éléments UI réutilisables (Motifs Africains, Cartes).
+- `src/utils/` : Algorithmes BKT et Système de traduction (i18n).
+- `src/db/` : Schéma de base de données et données initiales (seeds).
 
 ---
-**SMARTLearn** – *L'éducation sans limites, même sans réseau.*
-Developed by NGUETCHUISSI Brunel & FOFACK Henri Joel.
-ACIAI Challenge 2026.
+**Développé avec passion pour l'excellence éducative.** 🏺✨
