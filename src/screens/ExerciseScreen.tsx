@@ -177,6 +177,15 @@ const ExerciseScreen = ({ route }: any) => {
                   style={styles.explanationBtn}
                   onPress={async () => {
                     if (!showExplanation && !dynamicExplanation) {
+                      // Check if we have it in database first
+                      if (exercise.explanation_peulh && exercise.explanation_peulh.length > 10) {
+                        setDynamicExplanation(exercise.explanation_peulh);
+                        setShowExplanation(true);
+                        Speech.stop();
+                        Speech.speak(exercise.explanation_peulh, { language: 'fr-FR', rate: 0.85, pitch: 1.0 });
+                        return;
+                      }
+
                       setIsGenerating(true);
                       setShowExplanation(true);
                       
@@ -194,6 +203,17 @@ const ExerciseScreen = ({ route }: any) => {
                         if (i >= demoText.length) {
                           clearInterval(typeWriter);
                           setIsGenerating(false);
+                          
+                          // Technical Improvement: Cache the explanation in DB
+                          try {
+                            db.runSync(
+                              'UPDATE exercises SET explanation_peulh = ? WHERE id = ?',
+                              demoText, exercise.id
+                            );
+                            console.log('Technical: AI Explanation cached in DB');
+                          } catch (cacheErr) {
+                            console.error('Cache error', cacheErr);
+                          }
                         }
                       }, 30);
                     } else {

@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import Svg, { Path, Rect, G, Pattern, Defs, Circle } from 'react-native-svg';
 
 const { width, height } = Dimensions.get('window');
 
-const AfricanPattern = () => {
+const AfricanPattern = memo(() => {
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
       <Svg width="100%" height="100%" style={{ opacity: 0.04 }}>
@@ -65,6 +65,6 @@ const AfricanPattern = () => {
       </Svg>
     </View>
   );
-};
+});
 
 export default AfricanPattern;
