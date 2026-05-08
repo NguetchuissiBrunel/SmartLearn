@@ -32,6 +32,7 @@ const ExerciseScreen = ({ route }: any) => {
   const [progress] = useState(new Animated.Value(0));
   const [dynamicExplanation, setDynamicExplanation] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
   useEffect(() => {
     loadNextExercise();
@@ -99,15 +100,29 @@ const ExerciseScreen = ({ route }: any) => {
     }
   };
 
-  const playAudio = async () => {
+  const playAudio = async (text?: string) => {
     try {
-      if (exercise?.question) {
+      const speechText = text || exercise?.question;
+      if (speechText) {
         Speech.stop();
-        Speech.speak(exercise.question, { language: 'fr-FR', rate: 0.9, pitch: 1.1 });
+        setIsSpeaking(true);
+        
+        // Technical Improvement: Dynamic prosody based on content length
+        // Peulh sounds better with a slightly lower pitch and slower pace
+        const isPeulh = text && text.length > 50; 
+        
+        Speech.speak(speechText, { 
+          language: 'fr-FR', 
+          rate: isPeulh ? 0.75 : 0.9, 
+          pitch: isPeulh ? 0.9 : 1.1,
+          onDone: () => setIsSpeaking(false),
+          onStopped: () => setIsSpeaking(false),
+          onError: () => setIsSpeaking(false)
+        });
       }
     } catch (error) {
       console.error('Error playing speech', error);
-      Alert.alert('Erreur', 'Impossible de lire le texte.');
+      setIsSpeaking(false);
     }
   };
 
@@ -137,8 +152,9 @@ const ExerciseScreen = ({ route }: any) => {
           <BlurView intensity={80} tint="light" style={styles.exerciseCard}>
             <View style={styles.exerciseHeader}>
               <Text style={Typography.caption as any}>{chapterTitle}</Text>
-              <TouchableOpacity onPress={playAudio} style={styles.audioBtn}>
-                <Volume2 size={24} color={Colors.primary} />
+              <TouchableOpacity onPress={() => playAudio()} style={[styles.audioBtn, isSpeaking && styles.audioBtnActive]}>
+                <Volume2 size={24} color={isSpeaking ? '#FFF' : Colors.primary} />
+                {isSpeaking && <View style={styles.speakingIndicator} />}
               </TouchableOpacity>
             </View>
 
@@ -181,8 +197,7 @@ const ExerciseScreen = ({ route }: any) => {
                       if (exercise.explanation_peulh && exercise.explanation_peulh.length > 10) {
                         setDynamicExplanation(exercise.explanation_peulh);
                         setShowExplanation(true);
-                        Speech.stop();
-                        Speech.speak(exercise.explanation_peulh, { language: 'fr-FR', rate: 0.85, pitch: 1.0 });
+                        playAudio(exercise.explanation_peulh);
                         return;
                       }
 
@@ -193,8 +208,7 @@ const ExerciseScreen = ({ route }: any) => {
                       let currentText = '';
                       let i = 0;
                       
-                      Speech.stop();
-                      Speech.speak(demoText, { language: 'fr-FR', rate: 0.85, pitch: 1.0 });
+                      playAudio(demoText);
                       
                       const typeWriter = setInterval(() => {
                         currentText += demoText.charAt(i);
@@ -304,6 +318,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F7FF',
     padding: 10,
     borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  audioBtnActive: {
+    backgroundColor: Colors.primary,
+  },
+  speakingIndicator: {
+    width: 4,
+    height: 12,
+    backgroundColor: '#FFF',
+    marginLeft: 8,
+    borderRadius: 2,
   },
   questionText: {
     fontSize: 22,
