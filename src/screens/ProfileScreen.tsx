@@ -34,10 +34,10 @@ const ProfileScreen = () => {
       if (studentData) setStudent(studentData);
 
       const attemptsCount = db.getFirstSync<{count: number}>('SELECT COUNT(*) as count FROM attempts');
-      if (attemptsCount) setStats(prev => ({ ...prev, totalAttempts: attemptsCount.count || 0 }));
+      if (attemptsCount) setStats((prev: any) => ({ ...prev, totalAttempts: attemptsCount.count || 0 }));
 
       const masteryAvg = db.getFirstSync<{avg: number}>('SELECT AVG(pL) as avg FROM student_knowledge');
-      if (masteryAvg) setStats(prev => ({ ...prev, avgMastery: masteryAvg.avg || 0 }));
+      if (masteryAvg) setStats((prev: any) => ({ ...prev, avgMastery: masteryAvg.avg || 0 }));
 
       // Premium Feel: Subtle haptic on entry
       Vibration.vibrate(15);
