@@ -12,6 +12,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { User, GraduationCap, School, ArrowRight } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { Colors, Spacing, Typography } from '../constants/theme';
 import AfricanPattern from '../components/AfricanPattern';
 import { db } from '../db/database';
@@ -85,69 +86,70 @@ const RegistrationScreen = () => {
             <Text style={[Typography.caption, { color: 'rgba(255,255,255,0.8)' }] as any}>Apprendre à mon rythme, partout.</Text>
           </View>
 
-        <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <User size={20} color={Colors.textSecondary} style={styles.icon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Ton nom complet"
-              placeholderTextColor={Colors.textSecondary}
-              value={name}
-              onChangeText={setName}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <GraduationCap size={20} color={Colors.textSecondary} style={styles.icon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Ta classe (ex: 6ème)"
-              placeholderTextColor={Colors.textSecondary}
-              value={studentClass}
-              onChangeText={setStudentClass}
-              editable={false} // Defaulted to 6ème as per specs
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <School size={20} color={Colors.textSecondary} style={styles.icon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Nom de ton école"
-              placeholderTextColor={Colors.textSecondary}
-              value={school}
-              onChangeText={setSchool}
-            />
-          </View>
-
-          <View style={styles.languageContainer}>
-            <Text style={styles.label}>Langue de l'interface</Text>
-            <View style={styles.langButtons}>
-              <TouchableOpacity 
-                style={[styles.langBtn, language === 'fr' && styles.langBtnActive]} 
-                onPress={() => setLanguage('fr')}
-              >
-                <Text style={[styles.langBtnText, language === 'fr' && styles.langBtnTextActive]}>Français</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.langBtn, language === 'ful' && styles.langBtnActive]} 
-                onPress={() => setLanguage('ful')}
-              >
-                <Text style={[styles.langBtnText, language === 'ful' && styles.langBtnTextActive]}>Peulh</Text>
-              </TouchableOpacity>
+          <BlurView intensity={80} tint="light" style={styles.form}>
+            <View style={styles.inputContainer}>
+              <User size={20} color={Colors.textSecondary} style={styles.icon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Ton nom complet"
+                placeholderTextColor={Colors.textSecondary}
+                value={name}
+                onChangeText={setName}
+              />
             </View>
-          </View>
 
-          <TouchableOpacity 
-            style={[styles.button, isDownloading && { opacity: 0.7 }]} 
-            onPress={handleRegister}
-            disabled={isDownloading}
-          >
-            <Text style={styles.buttonText}>
-              {isDownloading ? `Initialisation IA... ${Math.round(downloadProgress * 100)}%` : 'Commencer'}
-            </Text>
-            {!isDownloading && <ArrowRight size={20} color={Colors.primary} />}
-          </TouchableOpacity>
+            <View style={styles.inputContainer}>
+              <GraduationCap size={20} color={Colors.textSecondary} style={styles.icon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Ta classe (ex: 6ème)"
+                placeholderTextColor={Colors.textSecondary}
+                value={studentClass}
+                onChangeText={setStudentClass}
+                editable={false} 
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <School size={20} color={Colors.textSecondary} style={styles.icon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Nom de ton école"
+                placeholderTextColor={Colors.textSecondary}
+                value={school}
+                onChangeText={setSchool}
+              />
+            </View>
+
+            <View style={styles.languageContainer}>
+              <Text style={styles.label}>Langue de l'interface</Text>
+              <View style={styles.langButtons}>
+                <TouchableOpacity 
+                  style={[styles.langBtn, language === 'fr' && styles.langBtnActive]} 
+                  onPress={() => setLanguage('fr')}
+                >
+                  <Text style={[styles.langBtnText, language === 'fr' && styles.langBtnTextActive]}>Français</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.langBtn, language === 'ful' && styles.langBtnActive]} 
+                  onPress={() => setLanguage('ful')}
+                >
+                  <Text style={[styles.langBtnText, language === 'ful' && styles.langBtnTextActive]}>Peulh</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <TouchableOpacity 
+              style={[styles.button, isDownloading && { opacity: 0.7 }]} 
+              onPress={handleRegister}
+              disabled={isDownloading}
+            >
+              <Text style={styles.buttonText}>
+                {isDownloading ? `Initialisation IA... ${Math.round(downloadProgress * 100)}%` : 'Commencer'}
+              </Text>
+              {!isDownloading && <ArrowRight size={20} color="#FFF" />}
+            </TouchableOpacity>
+          </BlurView>
         </View>
       </View>
 
@@ -178,25 +180,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   form: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
     padding: Spacing.lg,
-    borderRadius: 24,
-    shadowColor: Colors.accent,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 5,
+    borderRadius: 32,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+    overflow: 'hidden',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC', // light background
-    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)', 
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
     marginBottom: Spacing.md,
     paddingHorizontal: Spacing.md,
-    paddingVertical: 14, // bigger touch target
+    paddingVertical: 14,
   },
   icon: {
     marginRight: Spacing.md,

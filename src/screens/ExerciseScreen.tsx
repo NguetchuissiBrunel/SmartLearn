@@ -116,47 +116,42 @@ const ExerciseScreen = ({ route }: any) => {
   const options = JSON.parse(exercise.options);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <AfricanPattern />
-      
-      {/* Progress Bar */}
-      <View style={styles.progressContainer}>
-        <View style={styles.progressBarBg}>
-          <Animated.View style={{ width: progress.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }) }}>
-            <LinearGradient 
-              colors={[Colors.gradientStart, Colors.gradientEnd]} 
-              style={styles.progressBarFill} 
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-            />
-          </Animated.View>
-        </View>
-        <Text style={styles.progressText}>Maîtrise : {Math.round(knowledgeProb * 100)}%</Text>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.exerciseCard}>
-          <View style={styles.exerciseHeader}>
-            <Text style={Typography.caption as any}>{chapterTitle}</Text>
-            <TouchableOpacity onPress={playAudio} style={styles.audioBtn}>
-              <Volume2 size={24} color={Colors.secondary} />
-            </TouchableOpacity>
+    <LinearGradient colors={[Colors.bgGradientStart, Colors.bgGradientEnd]} style={styles.container}>
+      <SafeAreaView style={{ flex: 1 }}>
+        <AfricanPattern />
+        <View style={styles.progressContainer}>
+          <View style={styles.progressBarBg}>
+            <Animated.View style={{ width: progress.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }) }}>
+              <LinearGradient 
+                colors={[Colors.gradientStart, Colors.gradientEnd]} 
+                style={styles.progressBarFill} 
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              />
+            </Animated.View>
           </View>
+          <Text style={styles.progressText}>Maîtrise : {Math.round(knowledgeProb * 100)}%</Text>
+        </View>
 
-          <Text style={styles.questionText}>{exercise.question}</Text>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          <BlurView intensity={80} tint="light" style={styles.exerciseCard}>
+            <View style={styles.exerciseHeader}>
+              <Text style={Typography.caption as any}>{chapterTitle}</Text>
+              <TouchableOpacity onPress={playAudio} style={styles.audioBtn}>
+                <Volume2 size={24} color={Colors.primary} />
+              </TouchableOpacity>
+            </View>
 
-          <View style={styles.optionsContainer}>
-            {options.map((option: string, index: number) => {
-              const isSelected = answered && option === (isCorrect ? exercise.answer : option); // simplified visual feedback
-              const isWrong = answered && !isCorrect && option === option; // simplified
-              
-              return (
+            <Text style={styles.questionText}>{exercise.question}</Text>
+
+            <View style={styles.optionsContainer}>
+              {options.map((option: string, index: number) => (
                 <TouchableOpacity 
                   key={index}
                   style={[
                     styles.optionBtn,
                     answered && option === exercise.answer && styles.correctOption,
-                    answered && !isCorrect && option !== exercise.answer && styles.wrongOption, // very basic logic
+                    answered && !isCorrect && option !== exercise.answer && styles.wrongOption,
                   ]}
                   onPress={() => handleAnswer(option)}
                   disabled={answered}
@@ -167,82 +162,80 @@ const ExerciseScreen = ({ route }: any) => {
                   ]}>{option}</Text>
                   {answered && option === exercise.answer && <CheckCircle2 size={20} color={Colors.success} />}
                 </TouchableOpacity>
-              );
-            })}
-          </View>
+              ))}
+            </View>
 
-          {answered && (
-            <View style={styles.feedbackContainer}>
-              <View style={[styles.feedbackLabel, isCorrect ? styles.correctLabel : styles.wrongLabel]}>
-                <Text style={styles.feedbackText}>
-                  {isCorrect ? 'Excellent !' : 'Continue d\'apprendre !'}
-                </Text>
-              </View>
-
-              <TouchableOpacity 
-                style={styles.explanationBtn}
-                onPress={async () => {
-                  if (!showExplanation && !dynamicExplanation) {
-                    setIsGenerating(true);
-                    setShowExplanation(true);
-                    
-                    // DEMO MODE: Simulate fast typing effect of the perfect explanation
-                    const demoText = exercise.explanation_peulh || 'Explication générée avec succès.';
-                    let currentText = '';
-                    let i = 0;
-                    
-                    // Stop any current speech and read the explanation
-                    Speech.stop();
-                    Speech.speak(demoText, { language: 'fr-FR', rate: 0.85, pitch: 1.0 });
-                    
-                    const typeWriter = setInterval(() => {
-                      currentText += demoText.charAt(i);
-                      setDynamicExplanation(currentText);
-                      i++;
-                      if (i >= demoText.length) {
-                        clearInterval(typeWriter);
-                        setIsGenerating(false);
-                      }
-                    }, 30); // 30ms per character
-                  } else {
-                    setShowExplanation(!showExplanation);
-                  }
-                }}
-                disabled={isGenerating}
-              >
-                <Languages size={20} color={isGenerating ? Colors.border : Colors.secondary} />
-                <Text style={[styles.explanationBtnText, isGenerating && { color: Colors.border }]}>
-                  {isGenerating ? 'Génération...' : (showExplanation ? 'Masquer l\'explication' : 'Explication IA Peulh')}
-                </Text>
-              </TouchableOpacity>
-
-              {showExplanation && (
-                <View style={styles.explanationContent}>
-                  <Text style={styles.explanationText}>
-                    {dynamicExplanation || ''}
+            {answered && (
+              <View style={styles.feedbackContainer}>
+                <View style={[styles.feedbackLabel, isCorrect ? styles.correctLabel : styles.wrongLabel]}>
+                  <Text style={[styles.feedbackText, { color: isCorrect ? Colors.success : Colors.error }]}>
+                    {isCorrect ? 'Excellent !' : 'Continue d\'apprendre !'}
                   </Text>
                 </View>
-              )}
 
-              <TouchableOpacity 
-                style={styles.nextBtn}
-                onPress={loadNextExercise}
-              >
-                <Text style={styles.nextBtnText}>Exercice suivant</Text>
-                <ArrowRight size={20} color={Colors.primary} />
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+                <TouchableOpacity 
+                  style={styles.explanationBtn}
+                  onPress={async () => {
+                    if (!showExplanation && !dynamicExplanation) {
+                      setIsGenerating(true);
+                      setShowExplanation(true);
+                      
+                      const demoText = exercise.explanation_peulh || 'Explication générée avec succès.';
+                      let currentText = '';
+                      let i = 0;
+                      
+                      Speech.stop();
+                      Speech.speak(demoText, { language: 'fr-FR', rate: 0.85, pitch: 1.0 });
+                      
+                      const typeWriter = setInterval(() => {
+                        currentText += demoText.charAt(i);
+                        setDynamicExplanation(currentText);
+                        i++;
+                        if (i >= demoText.length) {
+                          clearInterval(typeWriter);
+                          setIsGenerating(false);
+                        }
+                      }, 30);
+                    } else {
+                      setShowExplanation(!showExplanation);
+                    }
+                  }}
+                  disabled={isGenerating}
+                >
+                  <Languages size={20} color={isGenerating ? Colors.border : Colors.secondary} />
+                  <Text style={[styles.explanationBtnText, isGenerating && { color: Colors.border }]}>
+                    {isGenerating ? 'Génération...' : (showExplanation ? 'Masquer l\'explication' : 'Explication IA Peulh')}
+                  </Text>
+                </TouchableOpacity>
+
+                {showExplanation && (
+                  <View style={styles.explanationContent}>
+                    <Text style={styles.explanationText}>
+                      {dynamicExplanation || ''}
+                    </Text>
+                  </View>
+                )}
+
+                <TouchableOpacity 
+                  style={styles.nextBtn}
+                  onPress={loadNextExercise}
+                >
+                  <Text style={styles.nextBtnText}>Exercice suivant</Text>
+                  <ArrowRight size={20} color={Colors.primary} />
+                </TouchableOpacity>
+              </View>
+            )}
+          </BlurView>
+        </ScrollView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: 'transparent',
   },
   progressContainer: {
     padding: Spacing.md,

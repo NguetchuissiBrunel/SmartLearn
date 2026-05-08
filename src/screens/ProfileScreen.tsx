@@ -10,6 +10,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { User, Award, TrendingUp, ChevronLeft } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { Colors, Spacing, Typography } from '../constants/theme';
 import AfricanPattern from '../components/AfricanPattern';
 import { db } from '../db/database';
@@ -45,58 +46,60 @@ const ProfileScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <AfricanPattern />
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <ChevronLeft color={Colors.primary} size={28} />
-        </TouchableOpacity>
-        <Text style={Typography.h1 as any}>Mon Profil</Text>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.profileCard}>
-          <View style={styles.avatarContainer}>
-            <User color={Colors.secondary} size={40} />
-          </View>
-          <Text style={styles.studentName}>{student?.name || 'Étudiant'}</Text>
-          <Text style={styles.schoolName}>{student?.school} - {student?.class}</Text>
-          
-          <View style={styles.badgeContainer}>
-            <Award color="#FFD700" size={24} />
-            <Text style={styles.badgeText}>{getBadgeTitle(stats.avgMastery)}</Text>
-          </View>
+    <LinearGradient colors={[Colors.bgGradientStart, Colors.bgGradientEnd]} style={styles.container}>
+      <SafeAreaView style={{ flex: 1 }}>
+        <AfricanPattern />
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <ChevronLeft color={Colors.primary} size={28} />
+          </TouchableOpacity>
+          <Text style={Typography.h1 as any}>Mon Profil</Text>
         </View>
 
-        <View style={styles.statsGrid}>
-          <View style={styles.statBox}>
-            <TrendingUp color={Colors.secondary} size={24} />
-            <Text style={styles.statValue}>{stats.totalAttempts}</Text>
-            <Text style={styles.statLabel}>Exercices faits</Text>
-          </View>
-          <View style={styles.statBox}>
-            <Award color={Colors.secondary} size={24} />
-            <Text style={styles.statValue}>{Math.round(stats.avgMastery * 100)}%</Text>
-            <Text style={styles.statLabel}>Maîtrise totale</Text>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Ma Progression</Text>
-          <View style={styles.progressCard}>
-            <Text style={styles.progressLabel}>Compétences acquises</Text>
-            <View style={styles.progressBarBg}>
-              <LinearGradient 
-                colors={[Colors.gradientStart, Colors.gradientEnd]} 
-                style={[styles.progressBar, { width: `${stats.avgMastery * 100}%` }]} 
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-              />
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          <BlurView intensity={80} tint="light" style={styles.profileCard}>
+            <View style={styles.avatarContainer}>
+              <User color={Colors.secondary} size={40} />
             </View>
+            <Text style={styles.studentName}>{student?.name || 'Étudiant'}</Text>
+            <Text style={styles.schoolName}>{student?.school} - {student?.class}</Text>
+            
+            <View style={styles.badgeContainer}>
+              <Award color="#FFD700" size={24} />
+              <Text style={styles.badgeText}>{getBadgeTitle(stats.avgMastery)}</Text>
+            </View>
+          </BlurView>
+
+          <View style={styles.statsGrid}>
+            <BlurView intensity={80} tint="light" style={styles.statBox}>
+              <TrendingUp color={Colors.secondary} size={24} />
+              <Text style={styles.statValue}>{stats.totalAttempts}</Text>
+              <Text style={styles.statLabel}>Exercices faits</Text>
+            </BlurView>
+            <BlurView intensity={80} tint="light" style={styles.statBox}>
+              <Award color={Colors.secondary} size={24} />
+              <Text style={styles.statValue}>{Math.round(stats.avgMastery * 100)}%</Text>
+              <Text style={styles.statLabel}>Maîtrise totale</Text>
+            </BlurView>
           </View>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Ma Progression</Text>
+            <BlurView intensity={80} tint="light" style={styles.progressCard}>
+              <Text style={styles.progressLabel}>Compétences acquises</Text>
+              <View style={styles.progressBarBg}>
+                <LinearGradient 
+                  colors={[Colors.gradientStart, Colors.gradientEnd]} 
+                  style={[styles.progressBar, { width: `${stats.avgMastery * 100}%` }]} 
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                />
+              </View>
+            </BlurView>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 };
 
@@ -118,16 +121,14 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
   },
   profileCard: {
-    backgroundColor: '#FFF',
-    borderRadius: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderRadius: 32,
     padding: Spacing.xl,
     alignItems: 'center',
     marginBottom: Spacing.lg,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+    overflow: 'hidden',
   },
   avatarContainer: {
     width: 88,
@@ -170,10 +171,13 @@ const styles = StyleSheet.create({
   },
   statBox: {
     flex: 1,
-    backgroundColor: '#FFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
     padding: Spacing.lg,
-    borderRadius: 20,
+    borderRadius: 24,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+    overflow: 'hidden',
   },
   statValue: {
     fontSize: 24,
@@ -197,14 +201,12 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   progressCard: {
-    backgroundColor: Colors.surface,
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
     padding: Spacing.lg,
-    borderRadius: 20,
-    shadowColor: Colors.accent,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+    overflow: 'hidden',
   },
   progressLabel: {
     fontSize: 15,
