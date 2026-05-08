@@ -24,21 +24,18 @@ const ProfileScreen = () => {
   });
 
   useEffect(() => {
-    db.transaction((tx: any) => {
-      // Get student info (latest)
-      tx.executeSql('SELECT * FROM students ORDER BY id DESC LIMIT 1', [], (_: any, { rows }: any) => {
-        if (rows.length > 0) setStudent(rows.item(0));
-      });
+    try {
+      const studentData = db.getFirstSync<any>('SELECT * FROM students ORDER BY id DESC LIMIT 1');
+      if (studentData) setStudent(studentData);
 
-      // Get stats
-      tx.executeSql('SELECT COUNT(*) as count FROM attempts', [], (_: any, { rows }: any) => {
-        setStats(prev => ({ ...prev, totalAttempts: rows.item(0).count }));
-      });
+      const attemptsCount = db.getFirstSync<{count: number}>('SELECT COUNT(*) as count FROM attempts');
+      if (attemptsCount) setStats(prev => ({ ...prev, totalAttempts: attemptsCount.count }));
 
-      tx.executeSql('SELECT AVG(pL) as avg FROM student_knowledge', [], (_: any, { rows }: any) => {
-        setStats(prev => ({ ...prev, avgMastery: rows.item(0).avg || 0 }));
-      });
-    });
+      const masteryAvg = db.getFirstSync<{avg: number}>('SELECT AVG(pL) as avg FROM student_knowledge');
+      if (masteryAvg) setStats(prev => ({ ...prev, avgMastery: masteryAvg.avg || 0 }));
+    } catch (err) {
+      console.error('Error fetching profile stats', err);
+    }
   }, []);
 
   const getBadgeTitle = (mastery: number) => {

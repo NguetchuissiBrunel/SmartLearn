@@ -26,22 +26,20 @@ const ChaptersScreen = () => {
   const [chapters, setChapters] = useState<any[]>([]);
 
   useEffect(() => {
-    db.transaction((tx: any) => {
-      tx.executeSql(`
-        SELECT c.*, AVG(sk.mastery) as avg_mastery 
+    try {
+      const rows = db.getAllSync<any>(`
+        SELECT c.*, AVG(sk.pL) as avg_mastery 
         FROM chapters c 
         LEFT JOIN skills s ON s.chapter_id = c.id 
         LEFT JOIN student_knowledge sk ON sk.skill_id = s.id 
         GROUP BY c.id
-      `, [], (_: any, { rows }: any) => {
-        const data = [];
-        for (let i = 0; i < rows.length; i++) {
-          const ch = rows.item(i);
-          data.push({ ...ch, mastery: ch.avg_mastery || 0 });
-        }
-        setChapters(data);
-      });
-    });
+      `);
+      
+      const data = rows.map(ch => ({ ...ch, mastery: ch.avg_mastery || 0 }));
+      setChapters(data);
+    } catch (err) {
+      console.error('Error fetching chapters', err);
+    }
   }, []);
 
   const renderItem = ({ item }: { item: any }) => (
@@ -103,16 +101,16 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: '#FFF',
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 16,
+    padding: 24, // Bigger padding
+    borderRadius: 20,
+    marginBottom: 24, // More space between cards
     borderWidth: 1,
     borderColor: '#F0F0F0',
-    elevation: 2,
+    elevation: 4, // Better shadow for depth
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -131,10 +129,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   chapterTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.primary,
-    marginBottom: 4,
+    fontSize: 22, // Larger, more readable title
+    fontWeight: '900',
+    color: Colors.text, // Use theme text color instead of primary for better readability
+    marginBottom: 6,
   },
   chapterDesc: {
     fontSize: 14,

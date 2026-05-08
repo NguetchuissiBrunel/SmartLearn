@@ -26,50 +26,46 @@ const RegistrationScreen = () => {
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!name || !school) {
       Alert.alert('Champs requis', 'Veuillez remplir toutes les informations.');
       return;
     }
 
-    db.transaction((tx: any) => {
-      tx.executeSql(
+    try {
+      const result = db.runSync(
         'INSERT INTO students (name, class, school, language) VALUES (?, ?, ?, ?)',
-        [name, studentClass, school, language],
-        async (_: any, { insertId }: any) => {
-          console.log('Student registered with ID:', insertId);
-          
-          // Check if model needs download
-          const exists = await ModelManager.checkModelExists();
-          if (!exists) {
-            setIsDownloading(true);
-            try {
-              // DEMO MODE: Simulate fast download for the video presentation
-              let p = 0;
-              const interval = setInterval(() => {
-                p += 0.25;
-                if (p > 1) p = 1;
-                setDownloadProgress(p);
-                if (p >= 1) {
-                  clearInterval(interval);
-                  setIsDownloading(false);
-                  navigation.navigate('Chapters');
-                }
-              }, 600); // 2.4 seconds total fake download
-            } catch (error) {
-              Alert.alert('Erreur', 'Échec du téléchargement du cerveau de l\'IA. Veuillez vérifier votre connexion.');
-              setIsDownloading(false);
-            }
-          } else {
-            navigation.navigate('Chapters');
-          }
-        },
-        (_: any, err: any) => {
-          console.error('Error saving student', err);
-          return true;
-        }
+        name, studentClass, school, language
       );
-    });
+      console.log('Student registered with ID:', result.lastInsertRowId);
+      
+      // Check if model needs download
+      const exists = await ModelManager.checkModelExists();
+      if (!exists) {
+        setIsDownloading(true);
+        try {
+          // DEMO MODE: Simulate fast download for the video presentation
+          let p = 0;
+          const interval = setInterval(() => {
+            p += 0.25;
+            if (p > 1) p = 1;
+            setDownloadProgress(p);
+            if (p >= 1) {
+              clearInterval(interval);
+              setIsDownloading(false);
+              navigation.navigate('Chapters');
+            }
+          }, 600); // 2.4 seconds total fake download
+        } catch (error) {
+          Alert.alert('Erreur', 'Échec du téléchargement du cerveau de l\'IA. Veuillez vérifier votre connexion.');
+          setIsDownloading(false);
+        }
+      } else {
+        navigation.navigate('Chapters');
+      }
+    } catch (err) {
+      console.error('Error saving student', err);
+    }
   };
 
   return (
@@ -194,10 +190,13 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-    marginBottom: Spacing.lg,
-    paddingVertical: Spacing.sm,
+    backgroundColor: '#F8FAFC', // light background
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    marginBottom: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 14, // bigger touch target
   },
   icon: {
     marginRight: Spacing.md,
@@ -212,21 +211,22 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: Colors.text,
     marginBottom: 8,
-    marginTop: 12,
+    marginTop: 8,
+    marginLeft: 4,
   },
   button: {
     backgroundColor: Colors.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
+    padding: 18, // increased for ergonomics
     borderRadius: 16,
-    marginTop: 15,
+    marginTop: 20,
     shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 6,
   },
   buttonText: {
     color: '#FFF',

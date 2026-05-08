@@ -40,36 +40,31 @@ const ExerciseScreen = ({ route }: any) => {
   }, []);
 
   const loadNextExercise = () => {
-    // Selection of the next exercise based on BKT or random for the chapter
-    db.transaction((tx: any) => {
-
-      tx.executeSql(
-        'SELECT * FROM exercises WHERE skill_id IN (SELECT id FROM skills WHERE chapter_id = ? OR 1=1) ORDER BY RANDOM() LIMIT 1',
-        [chapterId],
-        (_: any, { rows }: any) => {
-          if (rows.length > 0) {
-            const ex = rows.item(0);
-            setExercise(ex);
-            setShowExplanation(false);
-            setAnswered(false);
-            setDynamicExplanation(null);
-
-            // Load student knowledge for this skill
-            tx.executeSql(
-              'SELECT pL FROM student_knowledge WHERE student_id = 1 AND skill_id = ?',
-              [ex.skill_id],
-              (_2: any, { rows: kRows }: any) => {
-                if (kRows.length > 0) {
-                  const pL = kRows.item(0).pL;
-                  setKnowledgeProb(pL);
-                  progress.setValue(pL);
-                }
-              }
-            );
-          }
-        }
+    try {
+      const ex = db.getFirstSync<any>(
+        'SELECT * FROM exercises WHERE chapter_id = ? ORDER BY RANDOM() LIMIT 1',
+        chapterId
       );
-    });
+      
+      if (ex) {
+        setExercise(ex);
+        setShowExplanation(false);
+        setAnswered(false);
+        setDynamicExplanation(null);
+
+        const knowledge = db.getFirstSync<any>(
+          'SELECT pL FROM student_knowledge WHERE student_id = 1 AND skill_id = ?',
+          ex.skill_id
+        );
+        
+        if (knowledge) {
+          setKnowledgeProb(knowledge.pL);
+          progress.setValue(knowledge.pL);
+        }
+      }
+    } catch (err) {
+      console.error('Error loading exercise', err);
+    }
   };
 
   const handleAnswer = (option: string) => {
@@ -79,30 +74,28 @@ const ExerciseScreen = ({ route }: any) => {
     setIsCorrect(correct);
     setAnswered(true);
 
-    // Update BKT persistently
-    db.transaction((tx: any) => {
-      // 1. Log the attempt
-      tx.executeSql(
+    try {
+      db.runSync(
         'INSERT INTO attempts (student_id, exercise_id, is_correct) VALUES (1, ?, ?)',
-        [exercise.id, correct ? 1 : 0]
+        exercise.id, correct ? 1 : 0
       );
 
-      // 2. Update knowledge probability
       const newProb = updateKnowledge(knowledgeProb, correct);
       setKnowledgeProb(newProb);
 
-      tx.executeSql(
+      db.runSync(
         'INSERT OR REPLACE INTO student_knowledge (student_id, skill_id, pL, last_updated) VALUES (1, ?, ?, CURRENT_TIMESTAMP)',
-        [exercise.skill_id, newProb]
+        exercise.skill_id, newProb
       );
 
-      // Animate progress
       Animated.timing(progress, {
         toValue: newProb,
         duration: 500,
         useNativeDriver: false
       }).start();
-    });
+    } catch (err) {
+      console.error('Error updating attempt', err);
+    }
   };
 
   const playAudio = async () => {
@@ -196,6 +189,10 @@ const ExerciseScreen = ({ route }: any) => {
                     const demoText = exercise.explanation_peulh || 'Explication générée avec succès.';
                     let currentText = '';
                     let i = 0;
+                    
+                    // Stop any current speech and read the explanation
+                    Speech.stop();
+                    Speech.speak(demoText, { language: 'fr-FR', rate: 0.85, pitch: 1.0 });
                     
                     const typeWriter = setInterval(() => {
                       currentText += demoText.charAt(i);
@@ -308,23 +305,32 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.background,
-    padding: Spacing.md,
+    backgroundColor: Colors.surface,
+    padding: 18, // Larger padding for ergonomics
     borderRadius: 16,
-    marginBottom: Spacing.sm,
+    marginBottom: 12,
     borderWidth: 1,
     borderColor: Colors.border,
+    shadowColor: Colors.text,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   optionText: {
     fontSize: 18,
     color: Colors.text,
+    fontWeight: '500',
   },
   correctOption: {
     borderColor: Colors.success,
     backgroundColor: '#F0FFF4',
+    borderWidth: 2, // Thicker border for clarity
   },
   wrongOption: {
-     // Optional: styles for wrong choices
+    borderColor: Colors.error,
+    backgroundColor: '#FFF5F5',
+    borderWidth: 2,
   },
   correctOptionText: {
     color: Colors.success,
@@ -381,8 +387,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: Spacing.md,
+    padding: 20, // Bigger for easier clicking
     borderRadius: 16,
+    shadowColor: Colors.secondary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
   nextBtnText: {
     color: Colors.primary,
