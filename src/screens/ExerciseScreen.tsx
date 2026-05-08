@@ -33,6 +33,7 @@ const ExerciseScreen = ({ route }: any) => {
   const [dynamicExplanation, setDynamicExplanation] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [currentLang, setCurrentLang] = useState<'fr' | 'ful'>('fr');
 
   useEffect(() => {
     loadNextExercise();
@@ -63,6 +64,14 @@ const ExerciseScreen = ({ route }: any) => {
           setKnowledgeProb(knowledge.pL);
           progress.setValue(knowledge.pL);
         }
+
+        // Automatic Bilingual Audio on Load
+        const frQuestion = ex.question;
+        const fulQuestion = ex.explanation_peulh?.includes('---') 
+          ? ex.explanation_peulh.split('---')[1].trim() 
+          : (ex.explanation_peulh || 'Jaabol mbootu.');
+        
+        playAudio(`${frQuestion} --- ${fulQuestion}`);
       }
     } catch (err) {
       console.error('Error loading exercise', err);
@@ -100,46 +109,47 @@ const ExerciseScreen = ({ route }: any) => {
     }
   };
 
-  const playAudio = async (text?: string) => {
+  const playAudio = async (text?: string, forceLang?: 'fr' | 'ful') => {
     try {
-      const speechText = text || exercise?.question;
-      if (speechText) {
-        Speech.stop();
-        setIsSpeaking(true);
-        
-        // Technical Improvement: Sequential Bilingual Playback
-        if (text && text.includes('---')) {
-          const parts = text.split('---');
-          const frenchPart = parts[0].replace('Explication :', '').trim();
-          const peulhPart = parts[1].trim();
+      let speechText = text || exercise?.question;
+      if (!speechText) return;
 
-          // Speak French first
-          Speech.speak(frenchPart, {
-            language: 'fr-FR',
-            rate: 0.9,
-            pitch: 1.0,
-            onDone: () => {
-              // Short pause before Peulh
-              setTimeout(() => {
-                Speech.speak(peulhPart, {
-                  language: 'fr-FR', // Using FR voice with custom prosody for Peulh
-                  rate: 0.75,
-                  pitch: 0.85,
-                  onDone: () => setIsSpeaking(false)
-                });
-              }, 800);
-            }
+      Speech.stop();
+      setIsSpeaking(true);
+
+      const targetLang = forceLang || currentLang;
+
+      // Handle Bilingual Sequential Playback if requested (via ---)
+      if (speechText.includes('---')) {
+        const parts = speechText.split('---');
+        const fr = parts[0].replace('Explication :', '').trim();
+        const ful = parts[1].trim();
+
+        if (targetLang === 'fr') {
+          Speech.speak(fr, { 
+            language: 'fr-FR', 
+            rate: 0.85, // Slightly slower for better clarity
+            pitch: 1.0, 
+            onDone: () => setIsSpeaking(false) 
           });
         } else {
-          // Standard single-language playback
-          Speech.speak(speechText, { 
+          // Optimized for PEULH: Even slower and deeper for a natural 'Griot' style
+          Speech.speak(ful, { 
             language: 'fr-FR', 
-            rate: 0.9, 
-            pitch: 1.1,
-            onDone: () => setIsSpeaking(false),
-            onStopped: () => setIsSpeaking(false)
+            rate: 0.55, // Very slow to capture Peulh rhythm
+            pitch: 0.75, // Lower pitch sounds less like a computer
+            onDone: () => setIsSpeaking(false) 
           });
         }
+      } else {
+        // Standard single-language playback based on toggle
+        Speech.speak(speechText, { 
+          language: 'fr-FR', 
+          rate: targetLang === 'ful' ? 0.55 : 0.85, 
+          pitch: targetLang === 'ful' ? 0.75 : 1.0,
+          onDone: () => setIsSpeaking(false),
+          onStopped: () => setIsSpeaking(false)
+        });
       }
     } catch (error) {
       console.error('Error playing speech', error);
@@ -173,13 +183,24 @@ const ExerciseScreen = ({ route }: any) => {
           <BlurView intensity={80} tint="light" style={styles.exerciseCard}>
             <View style={styles.exerciseHeader}>
               <Text style={Typography.caption as any}>{chapterTitle}</Text>
-              <TouchableOpacity onPress={() => playAudio()} style={[styles.audioBtn, isSpeaking && styles.audioBtnActive]}>
-                <Volume2 size={24} color={isSpeaking ? '#FFF' : Colors.primary} />
-                {isSpeaking && <View style={styles.speakingIndicator} />}
-              </TouchableOpacity>
+              <View style={styles.headerActions}>
+                <TouchableOpacity 
+                  onPress={() => setCurrentLang(currentLang === 'fr' ? 'ful' : 'fr')} 
+                  style={styles.langToggleBtn}
+                >
+                  <Languages size={20} color={Colors.primary} />
+                  <Text style={styles.langToggleText}>{currentLang === 'fr' ? 'FR' : 'FUL'}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => playAudio()} style={[styles.audioBtn, isSpeaking && styles.audioBtnActive]}>
+                  <Volume2 size={24} color={isSpeaking ? '#FFF' : Colors.primary} />
+                  {isSpeaking && <View style={styles.speakingIndicator} />}
+                </TouchableOpacity>
+              </View>
             </View>
 
-            <Text style={styles.questionText}>{exercise.question}</Text>
+            <Text style={styles.questionText}>
+              {currentLang === 'fr' ? exercise.question : (exercise.explanation_peulh?.split('---')[1]?.trim() || 'Jaabol mbootu.')}
+            </Text>
 
             <View style={styles.optionsContainer}>
               {options.map((option: string, index: number) => (
@@ -320,23 +341,43 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
   },
   exerciseCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
     borderRadius: 32,
-    padding: Spacing.lg,
+    padding: Spacing.xl,
     minHeight: 450,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.8)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.9)',
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 15 },
+    shadowOpacity: 0.15,
+    shadowRadius: 30,
+    elevation: 8,
   },
   exerciseHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: Spacing.lg,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  langToggleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0F7FF',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    gap: 6,
+  },
+  langToggleText: {
+    fontSize: 12,
+    fontWeight: '900',
+    color: Colors.primary,
   },
   audioBtn: {
     backgroundColor: '#F0F7FF',

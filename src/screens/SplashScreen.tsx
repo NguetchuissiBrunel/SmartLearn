@@ -55,23 +55,29 @@ const SplashScreen = ({ navigation }: any) => {
             }
           ]}
         >
-          <View style={styles.iconCircle}>
-            <GraduationCap size={60} color={Colors.primary} />
+          <View style={styles.outerBadge}>
+            <View style={styles.innerBadge}>
+              <GraduationCap size={70} color={Colors.primary} strokeWidth={2.5} />
+            </View>
+            <View style={styles.goldRing} />
           </View>
         </Animated.View>
 
         <Animated.View 
           style={{ 
             opacity: fadeAnim,
-            transform: [{ translateY: slideAnim }]
+            transform: [{ translateY: slideAnim }],
+            alignItems: 'center'
           }}
         >
           <Text style={styles.title}>SMARTLearn</Text>
-          <Text style={styles.subtitle}>L'IA au service de l'éducation</Text>
+          <View style={styles.taglineBox}>
+            <Text style={styles.subtitle}>L'EXCELLENCE PAR L'IA</Text>
+          </View>
         </Animated.View>
 
         <View style={styles.footer}>
-          <Text style={styles.version}>v1.0 Premium Demo</Text>
+          <Text style={styles.version}>PREMIUM COMPETITION EDITION</Text>
         </View>
       </View>
     </LinearGradient>
@@ -89,44 +95,80 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logoContainer: {
-    marginBottom: 30,
+    marginBottom: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  iconCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+  outerBadge: {
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.4)',
+  },
+  innerBadge: {
+    width: 130,
+    height: 130,
+    borderRadius: 65,
     backgroundColor: '#FFF',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
-    shadowRadius: 15,
-    elevation: 10,
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 15,
+  },
+  goldRing: {
+    position: 'absolute',
+    width: 145,
+    height: 145,
+    borderRadius: 72.5,
+    borderWidth: 2,
+    borderColor: '#F59E0B',
+    opacity: 0.6,
   },
   title: {
     ...Typography.h1,
     color: '#FFF',
-    fontSize: 42,
+    fontSize: 48,
     textAlign: 'center',
+    letterSpacing: 2,
+    fontWeight: '900',
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 10,
+  },
+  taglineBox: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    paddingHorizontal: 20,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
   },
   subtitle: {
     ...Typography.caption,
-    color: 'rgba(255,255,255,0.8)',
+    color: '#FFF',
     textAlign: 'center',
-    fontSize: 18,
-    marginTop: 5,
+    fontSize: 14,
+    fontWeight: '900',
+    letterSpacing: 3,
   },
   footer: {
     position: 'absolute',
-    bottom: -height * 0.3,
+    bottom: -height * 0.25,
     alignItems: 'center',
   },
   version: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 12,
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 10,
     fontWeight: 'bold',
-    letterSpacing: 2,
+    letterSpacing: 4,
   },
 });
 

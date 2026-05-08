@@ -73,25 +73,25 @@ const ChaptersScreen = () => {
       <SafeAreaView style={{ flex: 1 }}>
         <AfricanPattern />
         <View style={styles.header}>
-        <Text style={Typography.h1 as any}>Choisis ton chapitre</Text>
-        <Text style={Typography.caption as any}>Continue ton aventure d'apprentissage.</Text>
-      </View>
+          <Text style={Typography.h1 as any}>Choisis ton chapitre</Text>
+          <Text style={Typography.caption as any}>Continue ton aventure d'apprentissage.</Text>
+        </View>
 
-      <FlatList
-        data={chapters}
-        renderItem={renderItem}
-        keyExtractor={item => item.id.toString()}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-      />
-    </SafeAreaView>
+        <FlatList
+          data={chapters}
+          renderItem={renderItem}
+          keyExtractor={item => item.id.toString()}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+        />
+      </SafeAreaView>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
   },
   header: {
     padding: Spacing.xl,
