@@ -107,18 +107,39 @@ const ExerciseScreen = ({ route }: any) => {
         Speech.stop();
         setIsSpeaking(true);
         
-        // Technical Improvement: Dynamic prosody based on content length
-        // Peulh sounds better with a slightly lower pitch and slower pace
-        const isPeulh = text && text.length > 50; 
-        
-        Speech.speak(speechText, { 
-          language: 'fr-FR', 
-          rate: isPeulh ? 0.75 : 0.9, 
-          pitch: isPeulh ? 0.9 : 1.1,
-          onDone: () => setIsSpeaking(false),
-          onStopped: () => setIsSpeaking(false),
-          onError: () => setIsSpeaking(false)
-        });
+        // Technical Improvement: Sequential Bilingual Playback
+        if (text && text.includes('---')) {
+          const parts = text.split('---');
+          const frenchPart = parts[0].replace('Explication :', '').trim();
+          const peulhPart = parts[1].trim();
+
+          // Speak French first
+          Speech.speak(frenchPart, {
+            language: 'fr-FR',
+            rate: 0.9,
+            pitch: 1.0,
+            onDone: () => {
+              // Short pause before Peulh
+              setTimeout(() => {
+                Speech.speak(peulhPart, {
+                  language: 'fr-FR', // Using FR voice with custom prosody for Peulh
+                  rate: 0.75,
+                  pitch: 0.85,
+                  onDone: () => setIsSpeaking(false)
+                });
+              }, 800);
+            }
+          });
+        } else {
+          // Standard single-language playback
+          Speech.speak(speechText, { 
+            language: 'fr-FR', 
+            rate: 0.9, 
+            pitch: 1.1,
+            onDone: () => setIsSpeaking(false),
+            onStopped: () => setIsSpeaking(false)
+          });
+        }
       }
     } catch (error) {
       console.error('Error playing speech', error);
@@ -204,32 +225,32 @@ const ExerciseScreen = ({ route }: any) => {
                       setIsGenerating(true);
                       setShowExplanation(true);
                       
-                      const demoText = exercise.explanation_peulh || 'Explication générée avec succès.';
+                      // Detailed Bilingual Content Generation
+                      const frText = `Explication : La bonne réponse est ${exercise.answer}. C'est une règle de base en ${chapterTitle}.`;
+                      const fulText = exercise.explanation_peulh || 'Ndahu ko woni jaabol mbootu.';
+                      const fullBilingualText = `${frText} --- ${fulText}`;
+                      
                       let currentText = '';
                       let i = 0;
                       
-                      playAudio(demoText);
+                      playAudio(fullBilingualText);
                       
                       const typeWriter = setInterval(() => {
-                        currentText += demoText.charAt(i);
+                        currentText += fullBilingualText.charAt(i);
                         setDynamicExplanation(currentText);
                         i++;
-                        if (i >= demoText.length) {
+                        if (i >= fullBilingualText.length) {
                           clearInterval(typeWriter);
                           setIsGenerating(false);
                           
-                          // Technical Improvement: Cache the explanation in DB
                           try {
                             db.runSync(
                               'UPDATE exercises SET explanation_peulh = ? WHERE id = ?',
-                              demoText, exercise.id
+                              fullBilingualText, exercise.id
                             );
-                            console.log('Technical: AI Explanation cached in DB');
-                          } catch (cacheErr) {
-                            console.error('Cache error', cacheErr);
-                          }
+                          } catch (e) {}
                         }
-                      }, 30);
+                      }, 20);
                     } else {
                       setShowExplanation(!showExplanation);
                     }
@@ -244,9 +265,12 @@ const ExerciseScreen = ({ route }: any) => {
 
                 {showExplanation && (
                   <View style={styles.explanationContent}>
-                    <Text style={styles.explanationText}>
-                      {dynamicExplanation || ''}
-                    </Text>
+                    {dynamicExplanation?.split('---').map((part, idx) => (
+                      <View key={idx} style={idx > 0 ? styles.peulhSection : styles.frSection}>
+                        <Text style={styles.langLabel}>{idx === 0 ? 'FRANÇAIS' : 'PEULH'}</Text>
+                        <Text style={styles.explanationText}>{part.trim()}</Text>
+                      </View>
+                    ))}
                   </View>
                 )}
 
@@ -417,10 +441,26 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   explanationText: {
-    fontSize: 15,
-    fontStyle: 'italic',
+    fontSize: 16,
     color: Colors.text,
-    lineHeight: 22,
+    lineHeight: 24,
+  },
+  peulhSection: {
+    marginTop: Spacing.md,
+    paddingTop: Spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.05)',
+  },
+  frSection: {
+    marginBottom: Spacing.sm,
+  },
+  langLabel: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: Colors.primary,
+    marginBottom: 4,
+    letterSpacing: 1,
+    opacity: 0.6,
   },
   nextBtn: {
     backgroundColor: Colors.secondary,
